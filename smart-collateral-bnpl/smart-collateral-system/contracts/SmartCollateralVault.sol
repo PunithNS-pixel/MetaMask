@@ -15,7 +15,7 @@ contract SmartCollateralVault is ReentrancyGuard, Ownable {
     
     // Collateral tracking
     mapping(address => mapping(address => uint256)) public collateralDeposits; // user => token => amount
-    mapping(address => mapping(address => bool)) public isCollateralSupported; // token => is supported
+    mapping(address => bool) public isCollateralSupported; // token => is supported
     
     // Debt tracking
     mapping(address => mapping(address => uint256)) public borrowedAmount; // user => token => amount

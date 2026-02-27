@@ -5,14 +5,25 @@ async function main() {
 
   const [deployer] = await hre.ethers.getSigners();
   console.log("📍 Deploying from account:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  
+  const balance = await hre.ethers.provider.getBalance(deployer.address);
+  console.log("Account balance:", hre.ethers.formatEther(balance), "BNB");
+
+  // 0. Deploy Mock USDT for testing
+  console.log("\n0️⃣ Deploying MockUSDT...");
+  const MockUSDT = await hre.ethers.getContractFactory("MockUSDT");
+  const mockUSDT = await MockUSDT.deploy();
+  await mockUSDT.waitForDeployment();
+  const mockUSDTAddress = await mockUSDT.getAddress();
+  console.log("✅ MockUSDT deployed to:", mockUSDTAddress);
 
   // 1. Deploy Price Oracle
   console.log("\n1️⃣ Deploying PriceOracle...");
   const PriceOracle = await hre.ethers.getContractFactory("PriceOracle");
   const priceOracle = await PriceOracle.deploy();
-  await priceOracle.deployed();
-  console.log("✅ PriceOracle deployed to:", priceOracle.address);
+  await priceOracle.waitForDeployment();
+  const priceOracleAddress = await priceOracle.getAddress();
+  console.log("✅ PriceOracle deployed to:", priceOracleAddress);
 
   // 2. Deploy SmartCollateralVault
   console.log("\n2️⃣ Deploying SmartCollateralVault...");
@@ -20,41 +31,41 @@ async function main() {
     "SmartCollateralVault"
   );
   const vault = await SmartCollateralVault.deploy();
-  await vault.deployed();
-  console.log("✅ SmartCollateralVault deployed to:", vault.address);
+  await vault.waitForDeployment();
+  const vaultAddress = await vault.getAddress();
+  console.log("✅ SmartCollateralVault deployed to:", vaultAddress);
 
   // 3. Deploy LiquidationEngine
   console.log("\n3️⃣ Deploying LiquidationEngine...");
   const LiquidationEngine = await hre.ethers.getContractFactory(
     "LiquidationEngine"
   );
-  const liquidationEngine = await LiquidationEngine.deploy(vault.address);
-  await liquidationEngine.deployed();
-  console.log("✅ LiquidationEngine deployed to:", liquidationEngine.address);
+  const liquidationEngine = await LiquidationEngine.deploy(vaultAddress);
+  await liquidationEngine.waitForDeployment();
+  const liquidationEngineAddress = await liquidationEngine.getAddress();
+  console.log("✅ LiquidationEngine deployed to:", liquidationEngineAddress);
 
   // 4. Deploy RiskController
   console.log("\n4️⃣ Deploying RiskController...");
   const RiskController = await hre.ethers.getContractFactory("RiskController");
   const riskController = await RiskController.deploy(
-    vault.address,
-    priceOracle.address
+    vaultAddress,
+    priceOracleAddress
   );
-  await riskController.deployed();
-  console.log("✅ RiskController deployed to:", riskController.address);
+  await riskController.waitForDeployment();
+  const riskControllerAddress = await riskController.getAddress();
+  console.log("✅ RiskController deployed to:", riskControllerAddress);
 
-  // 5. Deploy BNPL Lending Pool (requires a mock token)
+  // 5. Deploy BNPL Lending Pool
   console.log("\n5️⃣ Deploying BNPLLendingPool...");
   const BNPLLendingPool = await hre.ethers.getContractFactory(
     "BNPLLendingPool"
   );
 
-  // For testing, we can use a mock token or deploy a real one
-  // For now, we'll use a placeholder
-  const mockTokenAddress = "0x0000000000000000000000000000000000000000";
-
-  const bnplPool = await BNPLLendingPool.deploy(mockTokenAddress);
-  await bnplPool.deployed();
-  console.log("✅ BNPLLendingPool deployed to:", bnplPool.address);
+  const bnplPool = await BNPLLendingPool.deploy(mockUSDTAddress);
+  await bnplPool.waitForDeployment();
+  const bnplPoolAddress = await bnplPool.getAddress();
+  console.log("✅ BNPLLendingPool deployed to:", bnplPoolAddress);
 
   // ============================================
   // Configuration After Deployment
@@ -76,7 +87,7 @@ async function main() {
     mockBNB,
     7000, // 70% collateral factor
     11000, // 110% liquidation factor (10% bonus)
-    hre.ethers.utils.parseEther("1000") // Max borrow limit
+    hre.ethers.parseEther("1000") // Max borrow limit
   );
   console.log("✅ Risk parameters configured");
 
@@ -95,11 +106,12 @@ async function main() {
   console.log("╚════════════════════════════════════════════════╝\n");
 
   console.log("📋 CONTRACT ADDRESSES:\n");
-  console.log(`PriceOracle:           ${priceOracle.address}`);
-  console.log(`SmartCollateralVault:  ${vault.address}`);
-  console.log(`LiquidationEngine:     ${liquidationEngine.address}`);
-  console.log(`RiskController:        ${riskController.address}`);
-  console.log(`BNPLLendingPool:       ${bnplPool.address}`);
+  console.log(`MockUSDT:              ${mockUSDTAddress}`);
+  console.log(`PriceOracle:           ${priceOracleAddress}`);
+  console.log(`SmartCollateralVault:  ${vaultAddress}`);
+  console.log(`LiquidationEngine:     ${liquidationEngineAddress}`);
+  console.log(`RiskController:        ${riskControllerAddress}`);
+  console.log(`BNPLLendingPool:       ${bnplPoolAddress}`);
 
   console.log("\n📊 CONFIGURATION:");
   console.log("- Min Collateral Ratio: 150%");
@@ -129,11 +141,12 @@ async function main() {
     timestamp: new Date().toISOString(),
     deployer: deployer.address,
     contracts: {
-      priceOracle: priceOracle.address,
-      vault: vault.address,
-      liquidationEngine: liquidationEngine.address,
-      riskController: riskController.address,
-      bnplPool: bnplPool.address,
+      mockUSDT: mockUSDTAddress,
+      priceOracle: priceOracleAddress,
+      vault: vaultAddress,
+      liquidationEngine: liquidationEngineAddress,
+      riskController: riskControllerAddress,
+      bnplPool: bnplPoolAddress,
     },
   };
 

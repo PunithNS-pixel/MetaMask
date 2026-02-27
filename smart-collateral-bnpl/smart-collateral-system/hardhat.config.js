@@ -13,11 +13,7 @@ module.exports = {
     },
   },
   networks: {
-    hardhat: {
-      forking: {
-        enabled: false,
-      },
-    },
+    hardhat: {},
     localhost: {
       url: "http://127.0.0.1:8545",
     },
@@ -26,7 +22,7 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
     bnb_testnet: {
-      url: "https://data-seed-prebsc-1-us.bnbchain.org:8545",
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
