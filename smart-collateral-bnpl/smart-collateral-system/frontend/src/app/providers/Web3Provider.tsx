@@ -17,17 +17,39 @@ interface Web3ContextType {
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
 
-const BNB_TESTNET_CHAIN_ID = 97;
-const BNB_TESTNET_PARAMS = {
-  chainId: '0x61', // 97 in hex
-  chainName: 'BNB Smart Chain Testnet',
-  nativeCurrency: {
-    name: 'BNB',
-    symbol: 'tBNB',
-    decimals: 18,
+const TARGET_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 31337);
+const NETWORK_PARAMS: Record<
+  number,
+  {
+    chainId: string;
+    chainName: string;
+    nativeCurrency: { name: string; symbol: string; decimals: number };
+    rpcUrls: string[];
+    blockExplorerUrls: string[];
+  }
+> = {
+  97: {
+    chainId: '0x61',
+    chainName: 'BNB Smart Chain Testnet',
+    nativeCurrency: {
+      name: 'BNB',
+      symbol: 'tBNB',
+      decimals: 18,
+    },
+    rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
+    blockExplorerUrls: ['https://testnet.bscscan.com'],
   },
-  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
-  blockExplorerUrls: ['https://testnet.bscscan.com'],
+  31337: {
+    chainId: '0x7a69',
+    chainName: 'Hardhat Local',
+    nativeCurrency: {
+      name: 'ETH',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    rpcUrls: ['http://127.0.0.1:8545'],
+    blockExplorerUrls: ['http://127.0.0.1:8545'],
+  },
 };
 
 export function Web3Provider({ children }: { children: ReactNode }) {
@@ -37,7 +59,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const [chainId, setChainId] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  const isCorrectNetwork = chainId === BNB_TESTNET_CHAIN_ID;
+  const isCorrectNetwork = chainId === TARGET_CHAIN_ID;
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.ethereum) {
@@ -111,8 +133,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       setChainId(Number(network.chainId));
       setIsConnected(true);
 
-      // Auto-switch to BNB Testnet if on wrong network
-      if (Number(network.chainId) !== BNB_TESTNET_CHAIN_ID) {
+      if (Number(network.chainId) !== TARGET_CHAIN_ID) {
         await switchToBNBTestnet();
       }
     } catch (error: any) {
@@ -134,26 +155,27 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const targetParams = NETWORK_PARAMS[TARGET_CHAIN_ID] || NETWORK_PARAMS[31337];
+
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: BNB_TESTNET_PARAMS.chainId }],
+        params: [{ chainId: targetParams.chainId }],
       });
     } catch (switchError: any) {
-      // Chain not added to MetaMask
       if (switchError.code === 4902) {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [BNB_TESTNET_PARAMS],
+            params: [targetParams],
           });
         } catch (addError) {
-          console.error('Error adding BNB Testnet:', addError);
-          alert('Failed to add BNB Testnet to MetaMask');
+          console.error('Error adding network:', addError);
+          alert('Failed to add network to MetaMask');
         }
       } else {
-        console.error('Error switching to BNB Testnet:', switchError);
-        alert('Failed to switch to BNB Testnet');
+        console.error('Error switching network:', switchError);
+        alert('Failed to switch network');
       }
     }
   };

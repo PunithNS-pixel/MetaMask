@@ -67,19 +67,63 @@ async function main() {
   const bnplPoolAddress = await bnplPool.getAddress();
   console.log("✅ BNPLLendingPool deployed to:", bnplPoolAddress);
 
+  // 6. Deploy Risk Oracle (AI risk score ingestion)
+  console.log("\n6️⃣ Deploying RiskOracle...");
+  const RiskOracle = await hre.ethers.getContractFactory("RiskOracle");
+  const riskOracleV2 = await RiskOracle.deploy();
+  await riskOracleV2.waitForDeployment();
+  const riskOracleV2Address = await riskOracleV2.getAddress();
+  console.log("✅ RiskOracle deployed to:", riskOracleV2Address);
+
+  // 7. Deploy Insurance NFT
+  console.log("\n7️⃣ Deploying InsuranceNFT...");
+  const InsuranceNFT = await hre.ethers.getContractFactory("InsuranceNFT");
+  const insuranceNFT = await InsuranceNFT.deploy();
+  await insuranceNFT.waitForDeployment();
+  const insuranceNFTAddress = await insuranceNFT.getAddress();
+  console.log("✅ InsuranceNFT deployed to:", insuranceNFTAddress);
+
+  // 8. Deploy Insurance Pool
+  console.log("\n8️⃣ Deploying InsurancePool...");
+  const InsurancePool = await hre.ethers.getContractFactory("InsurancePool");
+  const insurancePool = await InsurancePool.deploy(mockUSDTAddress);
+  await insurancePool.waitForDeployment();
+  const insurancePoolAddress = await insurancePool.getAddress();
+  console.log("✅ InsurancePool deployed to:", insurancePoolAddress);
+
+  // 9. Deploy Insurance Manager
+  console.log("\n9️⃣ Deploying InsuranceManager...");
+  const InsuranceManager = await hre.ethers.getContractFactory("InsuranceManager");
+  const insuranceManager = await InsuranceManager.deploy(
+    insuranceNFTAddress,
+    insurancePoolAddress,
+    riskOracleV2Address
+  );
+  await insuranceManager.waitForDeployment();
+  const insuranceManagerAddress = await insuranceManager.getAddress();
+  console.log("✅ InsuranceManager deployed to:", insuranceManagerAddress);
+
+  // 10. Deploy Dynamic Collateral Validator
+  console.log("\n🔟 Deploying DynamicCollateralValidator...");
+  const DynamicCollateralValidator = await hre.ethers.getContractFactory("DynamicCollateralValidator");
+  const dynamicValidator = await DynamicCollateralValidator.deploy(riskOracleV2Address, vaultAddress);
+  await dynamicValidator.waitForDeployment();
+  const dynamicValidatorAddress = await dynamicValidator.getAddress();
+  console.log("✅ DynamicCollateralValidator deployed to:", dynamicValidatorAddress);
+
   // ============================================
   // Configuration After Deployment
   // ============================================
 
   console.log("\n⚙️  Configuring contracts...\n");
 
-  // Add a test collateral (would normally be USDT, USDC, BNB, etc.)
-  // Using mock BNB address for testing
+  // Add test collaterals
   const mockBNB = "0x000000000000000000000000000000000000000b";
 
   console.log("Adding supported collateral...");
   await vault.addCollateral(mockBNB);
-  console.log("✅ Added BNB as supported collateral");
+  await vault.addCollateral(mockUSDTAddress);
+  console.log("✅ Added BNB and MockUSDT as supported collateral");
 
   // Set collateral parameters
   console.log("Setting risk parameters...");
@@ -97,6 +141,28 @@ async function main() {
   await bnplPool.setUtilizationMultiplier(2000); // 20%
   console.log("✅ Interest rates configured");
 
+  // Configure insurance contracts
+  console.log("Setting insurance params...");
+  await insuranceNFT.setManager(insuranceManagerAddress);
+  await insurancePool.setManager(insuranceManagerAddress);
+  await insuranceManager.setLiquidationEngine(liquidationEngineAddress);
+
+  // Seed demo risk scores for all test accounts (they'll all use loanId 1-5)
+  const accounts = await hre.ethers.getSigners();
+  console.log("Seeding risk scores for test accounts...");
+  for (let i = 0; i < Math.min(5, accounts.length); i++) {
+    // Set different risk scores for variety: 10%, 12%, 15%, 18%, 20%
+    const riskPercentage = 1000 + (i * 200);
+    await riskOracleV2.setRiskScore(accounts[i].address, 1, riskPercentage);
+  }
+  console.log("✅ Risk scores seeded for 5 test accounts");
+  
+  // Fund insurance pool with liquidity
+  console.log("💰 Funding insurance pool with liquidity...");
+  await mockUSDT.approve(insurancePoolAddress, hre.ethers.parseEther("500000"));
+  await insurancePool.depositLiquidity(hre.ethers.parseEther("500000"));
+  console.log("✅ Insurance pool funded with 500,000 MockUSDT");
+
   // ============================================
   // Deployment Summary
   // ============================================
@@ -112,18 +178,29 @@ async function main() {
   console.log(`LiquidationEngine:     ${liquidationEngineAddress}`);
   console.log(`RiskController:        ${riskControllerAddress}`);
   console.log(`BNPLLendingPool:       ${bnplPoolAddress}`);
+  console.log(`RiskOracle:            ${riskOracleV2Address}`);
+  console.log(`InsuranceNFT:          ${insuranceNFTAddress}`);
+  console.log(`InsurancePool:         ${insurancePoolAddress}`);
+  console.log(`InsuranceManager:      ${insuranceManagerAddress}`);
+  console.log(`DynamicValidator:      ${dynamicValidatorAddress}`);
 
   console.log("\n📊 CONFIGURATION:");
-  console.log("- Min Collateral Ratio: 150%");
-  console.log("- Liquidation Threshold: 120%");
-  console.log("- Liquidation Bonus: 10%");
+  console.log("- ETH Collateral Ratio: 140% (Low Risk)");
+  console.log("- BNB Collateral Ratio: 160% (Medium Risk)");
+  console.log("- Meme Collateral Ratio: 220% (High Risk)");
   console.log("- Base Interest Rate: 5% APY");
   console.log("- Utilization Multiplier: 20%");
 
+  console.log("\n✅ SMART RISK PREDICTION ENGINE:");
+  console.log("🧠 Dynamic Liquidation Risk Assessment");
+  console.log("📊 Asset-based Risk Scoring (8% - 35%)");
+  console.log("🔒 Dynamic Collateral Requirements");
+  console.log("📈 Real-time Risk Display in UI");
+
   console.log("\n✅ NEXT STEPS:");
   console.log("1. Save the contract addresses above");
-  console.log("2. Deploy a test token or use existing USDT/USDC");
-  console.log("3. Set up Chainlink price feeds for collatals");
+  console.log("2. Test dynamic collateral validation");
+  console.log("3. View risk assessment in frontend");
   console.log("4. Run tests with: npm test");
   console.log("5. Verify contracts on Etherscan/BscScan");
 
@@ -147,6 +224,11 @@ async function main() {
       liquidationEngine: liquidationEngineAddress,
       riskController: riskControllerAddress,
       bnplPool: bnplPoolAddress,
+      riskOracle: riskOracleV2Address,
+      insuranceNFT: insuranceNFTAddress,
+      insurancePool: insurancePoolAddress,
+      insuranceManager: insuranceManagerAddress,
+      dynamicValidator: dynamicValidatorAddress,
     },
   };
 
