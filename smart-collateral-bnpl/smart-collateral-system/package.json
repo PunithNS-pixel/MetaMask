@@ -1,0 +1,41 @@
+{
+  "name": "smart-collateral-bnpl",
+  "version": "1.0.0",
+  "description": "Smart Collateral for Web3 Credit & BNPL - Production-ready DeFi system",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "deploy:testnet": "hardhat run scripts/deploy.js --network bnb_testnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network bnb_mainnet",
+    "lint": "solhint 'contracts/**/*.sol'",
+    "gas-report": "REPORT_GAS=true npm test"
+  },
+  "keywords": [
+    "defi",
+    "lending",
+    "bnpl",
+    "collateral",
+    "smart-contracts",
+    "ethereum",
+    "bnb",
+    "web3"
+  ],
+  "author": "Smart Collateral Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "hardhat": "^2.17.0",
+    "solhint": "^4.0.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "solidity-coverage": "^0.8.4"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.6.1",
+    "@openzeppelin/contracts": "^4.9.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
