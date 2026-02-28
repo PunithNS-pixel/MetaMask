@@ -51,10 +51,15 @@ export default function VaultOperations() {
   }, [collateralToken, defaultCollateral]);
 
   const fetchUserStats = async () => {
-    if (!signer || !account || !isCorrectNetwork || !collateralToken || !mockUsdtAddress) return;
+    if (!signer || !account || !isCorrectNetwork || !collateralToken || !mockUsdtAddress) {
+      console.log('Fetch conditions not met:', { signer: !!signer, account, isCorrectNetwork, collateralToken, mockUsdtAddress });
+      return;
+    }
 
     try {
+      console.log('Fetching user stats for:', { account, collateralToken });
       const vault = getContract('SMART_COLLATERAL_VAULT', signer);
+      console.log('Vault contract created:', vault.target);
 
       const [collateral, borrowed, health, collateralValue, totalDebt, minRatio] = await Promise.all([
         vault.collateralDeposits(account, collateralToken),
@@ -64,6 +69,8 @@ export default function VaultOperations() {
         vault.getTotalDebt(account),
         vault.minCollateralRatio(),
       ]);
+
+      console.log('Contract data fetched:', { collateral: collateral.toString(), borrowed: borrowed.toString() });
 
       let available = BigInt(0);
       if (collateralValue > BigInt(0)) {
@@ -77,8 +84,9 @@ export default function VaultOperations() {
         healthFactor: health.toString(),
         canBorrow: formatTokenAmount(available),
       });
-    } catch (error) {
-      console.error('Error fetching user stats:', error);
+      console.log('User stats updated');
+    } catch (error: any) {
+      console.error('Error fetching user stats:', error?.message || error);
     }
   };
 

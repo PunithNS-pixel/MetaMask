@@ -29,21 +29,28 @@ export default function DynamicRiskDisplay() {
 
   useEffect(() => {
     const fetchRiskData = async () => {
-      if (!signer || !isCorrectNetwork) return;
+      if (!signer || !isCorrectNetwork) {
+        console.log('Risk fetch conditions not met:', { signer: !!signer, isCorrectNetwork });
+        return;
+      }
 
       try {
         const validatorAddress = CONTRACT_ADDRESSES.DYNAMIC_VALIDATOR;
+        console.log('Validator address:', validatorAddress);
         if (!validatorAddress) {
           console.error('DynamicCollateralValidator address not found');
           return;
         }
 
         const validator = getContract('DYNAMIC_VALIDATOR', signer);
+        console.log('Validator contract created:', validator.target);
 
         const newAssets = await Promise.all(
           assets.map(async (asset) => {
             try {
+              console.log(`Fetching risk for ${asset.name}:`, asset.address);
               const riskInfo = await validator.getAssetRiskInfo(asset.address);
+              console.log(`Risk info for ${asset.name}:`, riskInfo);
               return {
                 ...asset,
                 riskInfo: {
@@ -54,16 +61,17 @@ export default function DynamicRiskDisplay() {
                 },
                 loading: false,
               };
-            } catch (error) {
-              console.error(`Error fetching risk for ${asset.name}:`, error);
+            } catch (error: any) {
+              console.error(`Error fetching risk for ${asset.name}:`, error?.message || error);
               return { ...asset, loading: false };
             }
           })
         );
 
         setAssets(newAssets);
-      } catch (error) {
-        console.error('Error fetching risk data:', error);
+        console.log('Assets updated with risk data');
+      } catch (error: any) {
+        console.error('Error fetching risk data:', error?.message || error);
       }
     };
 
