@@ -1,0 +1,38 @@
+# Dockerfile for Hardhat Blockchain Node
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache git python3 make g++ wget
+
+# Copy package files
+COPY package*.json ./
+COPY hardhat.config.js ./
+
+# Install dependencies
+RUN npm install
+
+# Copy contract files and scripts
+COPY contracts/ ./contracts/
+COPY scripts/ ./scripts/
+COPY test/ ./test/
+
+# Compile contracts
+RUN npx hardhat compile
+
+# Expose Hardhat node port
+EXPOSE 8545
+
+# Create deployment script that runs node and deploys contracts
+RUN printf '#!/bin/sh\n\
+npx hardhat node --hostname 0.0.0.0 &\n\
+HARDHAT_PID=$!\n\
+echo "Waiting for Hardhat node to start..."\n\
+sleep 5\n\
+echo "Deploying contracts..."\n\
+npx hardhat run scripts/deploy.js --network localhost\n\
+echo "Contracts deployed! Hardhat node running on http://0.0.0.0:8545"\n\
+wait $HARDHAT_PID\n' > /app/start.sh && chmod +x /app/start.sh
+
+CMD ["/bin/sh", "/app/start.sh"]

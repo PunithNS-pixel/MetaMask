@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Hardhat Blockchain Node
+  blockchain:
+    build:
+      context: .
+      dockerfile: Dockerfile.blockchain
+    container_name: smart-collateral-blockchain
+    ports:
+      - "8545:8545"
+    networks:
+      - smart-collateral-network
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./deployment-info.json:/app/deployment-info.json
+      - blockchain-data:/app/data
+    environment:
+      - NODE_ENV=development
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8545"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: smart-collateral-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - smart-collateral-network
+    volumes:
+      - ./artifacts:/app/artifacts:ro
+      - ./frontend/.env.local:/app/.env.local:ro
+    environment:
+      - NEXT_PUBLIC_CHAIN_ID=31337
+      - NEXT_PUBLIC_RPC_URL=http://blockchain:8545
+    depends_on:
+      blockchain:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  smart-collateral-network:
+    driver: bridge
+
+volumes:
+  blockchain-data:

@@ -1,16 +1,16 @@
 import { ethers } from 'ethers';
 
 // Contract ABIs (will be imported from artifacts after deployment)
-import SmartCollateralVaultArtifact from '../../../artifacts/contracts/SmartCollateralVault.sol/SmartCollateralVault.json';
-import LiquidationEngineArtifact from '../../../artifacts/contracts/LiquidationEngine.sol/LiquidationEngine.json';
-import BNPLLendingPoolArtifact from '../../../artifacts/contracts/BNPLLendingPool.sol/BNPLLendingPool.json';
-import PriceOracleArtifact from '../../../artifacts/contracts/PriceOracle.sol/PriceOracle.json';
-import RiskControllerArtifact from '../../../artifacts/contracts/RiskController.sol/RiskController.json';
-import RiskOracleArtifact from '../../../artifacts/contracts/RiskOracle.sol/RiskOracle.json';
-import InsuranceNFTArtifact from '../../../artifacts/contracts/InsuranceNFT.sol/InsuranceNFT.json';
-import InsurancePoolArtifact from '../../../artifacts/contracts/InsurancePool.sol/InsurancePool.json';
-import InsuranceManagerArtifact from '../../../artifacts/contracts/InsuranceManager.sol/InsuranceManager.json';
-import DynamicCollateralValidatorArtifact from '../../../artifacts/contracts/DynamicCollateralValidator.sol/DynamicCollateralValidator.json';
+import SmartCollateralVaultArtifact from '../../artifacts/contracts/SmartCollateralVault.sol/SmartCollateralVault.json';
+import LiquidationEngineArtifact from '../../artifacts/contracts/LiquidationEngine.sol/LiquidationEngine.json';
+import BNPLLendingPoolArtifact from '../../artifacts/contracts/BNPLLendingPool.sol/BNPLLendingPool.json';
+import PriceOracleArtifact from '../../artifacts/contracts/PriceOracle.sol/PriceOracle.json';
+import RiskControllerArtifact from '../../artifacts/contracts/RiskController.sol/RiskController.json';
+import RiskOracleArtifact from '../../artifacts/contracts/RiskOracle.sol/RiskOracle.json';
+import InsuranceNFTArtifact from '../../artifacts/contracts/InsuranceNFT.sol/InsuranceNFT.json';
+import InsurancePoolArtifact from '../../artifacts/contracts/InsurancePool.sol/InsurancePool.json';
+import InsuranceManagerArtifact from '../../artifacts/contracts/InsuranceManager.sol/InsuranceManager.json';
+import DynamicCollateralValidatorArtifact from '../../artifacts/contracts/DynamicCollateralValidator.sol/DynamicCollateralValidator.json';
 
 // Contract Addresses (Update these after deployment)
 export const CONTRACT_ADDRESSES = {
