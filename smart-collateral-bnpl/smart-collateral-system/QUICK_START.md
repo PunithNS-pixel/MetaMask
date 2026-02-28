@@ -93,6 +93,55 @@ See [SYSTEM_STATUS.md](SYSTEM_STATUS.md) for details.
    - View risk predictions
    - Borrow assets
    - Test insurance features
+## 🔧 Troubleshooting: Data Not Updating?
+
+If vault stats show `0.0000` and don't update after deposits:
+
+### ✅ The Fix (Applied in Latest Version)
+
+The frontend needs contract addresses to fetch data. If addresses are stale, all contract calls return empty data.
+
+**Solution:**
+1. Contract addresses are now synced from `deployment-info.json`
+2. Frontend `.env.local` must match current deployed addresses
+3. When contracts are redeployed, update `.env.local`:
+   ```bash
+   # Copy addresses from deployment-info.json
+   NEXT_PUBLIC_VAULT_ADDRESS=<from deployment-info.json>
+   NEXT_PUBLIC_LIQUIDATION_ADDRESS=<from deployment-info.json>
+   # ... etc for all contracts
+   ```
+4. Rebuild frontend:
+   ```bash
+   docker-compose up -d --build frontend
+   ```
+
+### 📋 Verify It's Working
+
+1. **Check deployment addresses:**
+   ```bash
+   cat deployment-info.json | grep -A 20 '"contracts"'
+   ```
+
+2. **Run contract test:**
+   ```bash
+   node test-contracts.js
+   ```
+   Should show: `✓ minCollateralRatio`, `✓ Collateral deposits`, etc.
+
+3. **Check browser logs:**
+   - Open http://localhost:3000
+   - Press F12 for DevTools > Console
+   - Connect MetaMask wallet
+   - Look for: `Vault contract created: 0x...`
+   - Should match deployment-info.json
+
+### 📖 More Details
+
+See [frontend/ENV_SETUP.md](frontend/ENV_SETUP.md) for complete environment setup instructions.
+
+---
+
 
 ---
 
