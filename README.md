@@ -1,6 +1,6 @@
 # MetaMask
 
-![Uploading Untitled.svg…]()
+![Untitled](https://github.com/user-attachments/assets/da34def4-9735-4b50-9138-4cce556d8afc)
 <svg xmlns="http://www.w3.org/2000/svg" width="1629" height="15660" viewBox="0 0 1629 15660" role="img" aria-label="ToDiagram Export"><style type="text/css"><![CDATA[
 
 @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
