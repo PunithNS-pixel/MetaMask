@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output
+
+# Hardhat
+cache/
+artifacts/
+typechain/
+typechain-types/
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.vercel
+
+# Deployment
+deployment-info.json
+deployment-testnet.json
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+*.log
+docker-data/
+
+# Build
+dist/
+build/
+out/
+
+# Misc
+.cache/
+tmp/
+temp/

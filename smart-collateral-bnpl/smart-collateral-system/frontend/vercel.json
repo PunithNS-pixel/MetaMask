@@ -1,0 +1,11 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "regions": ["iad1"],
+  "env": {
+    "NEXT_PUBLIC_CHAIN_ID": "97",
+    "NEXT_PUBLIC_RPC_URL": "https://data-seed-prebsc-1-s1.bnbchain.org:8545"
+  }
+}

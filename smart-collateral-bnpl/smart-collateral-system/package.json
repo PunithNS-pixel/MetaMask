@@ -9,6 +9,9 @@
     "test:coverage": "hardhat coverage",
     "deploy:testnet": "hardhat run scripts/deploy.js --network bnb_testnet",
     "deploy:mainnet": "hardhat run scripts/deploy.js --network bnb_mainnet",
+    "deploy:public": "bash scripts/deploy-public.sh",
+    "check:balance": "hardhat run scripts/check-balance.js --network bnbTestnet",
+    "vercel:env": "node scripts/generate-vercel-env.js",
     "lint": "solhint 'contracts/**/*.sol'",
     "gas-report": "REPORT_GAS=true npm test"
   },
